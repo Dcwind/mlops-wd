@@ -177,3 +177,5 @@ cython_debug/
 *.iso
 *.tar.gz
 *.db
+
+*_predictions.parquet
