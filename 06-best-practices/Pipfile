@@ -11,6 +11,10 @@ pandas = "*"
 pyarrow = "*"
 
 [dev-packages]
+pytest = "*"
+black = "*"
+isort = "*"
+pylint = "*"
 
 [requires]
 python_version = "3.10"
