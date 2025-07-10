@@ -6,18 +6,19 @@ import pickle
 import pandas as pd
 import numpy as np
 
-categorical = ['PULocationID', 'DOLocationID']
 
 def read_data(filename):
     df = pd.read_parquet(filename)
-    
+
+    return df
+
+def prepare_data(df):
+    categorical = ['PULocationID', 'DOLocationID']
     df['duration'] = df.tpep_dropoff_datetime - df.tpep_pickup_datetime
     df['duration'] = df.duration.dt.total_seconds() / 60
 
     df = df[(df.duration >= 1) & (df.duration <= 60)].copy()
 
-    df[categorical] = df[categorical].fillna(-1).astype('int').astype('str')
-    
     return df
 
 def save_predictions(df, preds, year, month, output_file):
@@ -43,6 +44,8 @@ def run(year: int, month: int) -> str:
     Load the model, read data for the given year/month,
     run predictions, save results, and return output path.
     """
+    categorical = ['PULocationID', 'DOLocationID']
+    
     # load vectorizer and model
     with open('model.bin', 'rb') as f_in:
         dv, model = pickle.load(f_in)
@@ -54,6 +57,7 @@ def run(year: int, month: int) -> str:
 
     # predict
     df = read_data(url)
+    df = prepare_data(df)
     dicts = df[categorical].to_dict(orient='records')
     X_val = dv.transform(dicts)
     preds = model.predict(X_val)
