@@ -5,6 +5,8 @@ import argparse
 import pickle
 import pandas as pd
 import numpy as np
+import boto3
+from io import BytesIO
 
 categorical = ['PULocationID', 'DOLocationID']
 
@@ -30,13 +32,27 @@ def save_predictions(df, preds, year, month, output_file):
         "predicted_duration": preds
     })
 
-    # write to Parquet
-    df_result.to_parquet(
-        output_file,
-        engine="pyarrow",
-        compression=None,
-        index=False
-    )
+    # # write to Parquet
+    # df_result.to_parquet(
+    #     output_file,
+    #     engine="pyarrow",
+    #     compression=None,
+    #     index=False
+    # )
+
+    # write Parquet to an in‑memory buffer
+    buffer = BytesIO()
+    df_result.to_parquet(buffer, engine="pyarrow", compression=None, index=False)
+    buffer.seek(0)
+
+    # build S3 key and upload
+    bucket = "mlops-s3-bucket-test"
+    prefix = "taxi/predictions"
+    key = f"{prefix.rstrip('/')}/{output_file}"
+    s3 = boto3.client("s3")
+    s3.upload_fileobj(buffer, bucket, key)
+
+    return f"s3://{bucket}/{key}"
 
 def run(year: int, month: int) -> str:
     """
@@ -65,8 +81,8 @@ def run(year: int, month: int) -> str:
     output_file = (
         f'yellow_tripdata_{year:04d}-{month:02d}_predictions.parquet'
     )
-    save_predictions(df, preds, year, month, output_file)
-    print(f'Saved predictions to {output_file}')
+    output_location = save_predictions(df, preds, year, month, output_file)
+    print(f'Saved predictions to {output_location}')
 
     return output_file
 
