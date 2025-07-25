@@ -1,0 +1,10 @@
+name: integration-test
+
+services:
+  localstack:
+    image: localstack/localstack:3
+    environment:
+      SERVICES: s3
+      AWS_DEFAULT_REGION: ap-southeast-1
+    ports:
+      - "4566:4566"
