@@ -173,7 +173,6 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
-*.sh
 *.iso
 *.tar.gz
 *.db

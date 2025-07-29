@@ -33,7 +33,7 @@ def main():
     df_pred = read_data(BUCKET, OUTPUT_KEY)
     total = round(df_pred["predicted_duration"].sum(), 2)
     print("Sum:", total)
-    # assert total == 36.28, f"Expected 36.28, got {total}"
+    assert total == 36.28, f"Expected 36.28, got {total}"
 
 if __name__ == "__main__":
     main()
